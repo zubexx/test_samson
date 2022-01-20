@@ -48,3 +48,55 @@ echo convertString($a, $b). "<br />\n";
 
 
 ?>
+
+
+
+<h2>Тест mySortForKey($a, $b)</h2>
+
+<?php
+
+/*
+Реализовать функцию mySortForKey($a, $b). $a – двумерный массив вида [['a'=>2,'b'=>1],['a'=>1,'b'=>3]], $b – ключ вложенного массива. 
+Результат ее выполнения: двумерном массива $a отсортированный по возрастанию значений для ключа $b. 
+В случае отсутствия ключа $b в одном из вложенных массивов, выбросить ошибку класса Exception с индексом неправильного массива.
+*/
+
+function mySortForKey(array $a, $b) : array
+{
+    $aDim = count($a);
+    $noKey = false;
+    
+    $sortArray = array();
+    
+    for($i = 0; $i<$aDim; $i++){
+    foreach($a[$i] as $key=>$value){
+        if($key!==$b) //проверяем, есть ли ключ в массиве
+        {
+            $noKey = true;
+        }else{
+            $noKey = false;
+        }
+       
+        if(!isset($sortArray[$key])){
+            $sortArray[$key] = array();
+        }
+        $sortArray[$key][] = $value;
+    }
+    if($noKey) {  throw new Exception("В массиве с индексом  " . $i . "  отсутствует ключ  " . $b);} // если ключа нет, то выбрасываем исключение
+}
+array_multisort($sortArray[$b],SORT_ASC,$a); // сортируем по ключу
+
+  
+    
+          return $a;      
+}
+
+$a = [['a'=>2,'b'=>1],['a'=>1,'b'=>3],['a'=>5,'b'=>2],['a'=>8,'b'=>6],['a'=>3,'b'=>5],['a'=>4,'b'=>4]];
+
+try {
+    print_r(mySortForKey($a, 'b'));
+} catch (Exception $ex) {
+    echo "Ошибка. Неправильный массив: " . $ex->getMessage() . "<br>"; 
+}
+
+?>
