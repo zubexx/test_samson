@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Хост: 127.0.0.1:3306
--- Время создания: Янв 24 2022 г., 15:26
+-- Время создания: Янв 31 2022 г., 16:23
 -- Версия сервера: 5.7.33-log
 -- Версия PHP: 7.1.33
 
@@ -28,24 +28,24 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `a_category` (
-  `Ид` int(11) NOT NULL,
-  `Код` int(11) NOT NULL,
-  `Название` tinytext COLLATE utf8mb4_unicode_ci NOT NULL,
-  `кодТовара` int(11) NOT NULL,
-  `ИдРодКатегории` int(11) NOT NULL
+  `Id` int(11) NOT NULL,
+  `Code` int(11) NOT NULL,
+  `Name` tinytext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `productName` int(11) NOT NULL,
+  `IdParentCategory` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Дамп данных таблицы `a_category`
 --
 
-INSERT INTO `a_category` (`Ид`, `Код`, `Название`, `кодТовара`, `ИдРодКатегории`) VALUES
-(147, 2, 'Бумага', 201, 0),
-(148, 2, 'Бумага', 202, 0),
-(149, 3, 'Принтеры', 302, 0),
-(150, 30, 'МФУ', 302, 3),
-(151, 3, 'Принтеры', 305, 0),
-(152, 30, 'МФУ', 305, 3);
+INSERT INTO `a_category` (`Id`, `Code`, `Name`, `productName`, `IdParentCategory`) VALUES
+(153, 2, 'Бумага', 201, 0),
+(154, 2, 'Бумага', 202, 0),
+(155, 3, 'Принтеры', 302, 0),
+(156, 30, 'МФУ', 302, 3),
+(157, 3, 'Принтеры', 305, 0),
+(158, 30, 'МФУ', 305, 3);
 
 -- --------------------------------------------------------
 
@@ -54,17 +54,17 @@ INSERT INTO `a_category` (`Ид`, `Код`, `Название`, `кодТова�
 --
 
 CREATE TABLE `a_price` (
-  `кодТовара` int(11) NOT NULL,
-  `товар` tinytext COLLATE utf8mb4_unicode_ci NOT NULL,
-  `типЦены` tinytext COLLATE utf8mb4_unicode_ci NOT NULL,
-  `Цена` float NOT NULL
+  `productCode` int(11) NOT NULL,
+  `productName` tinytext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `priceType` tinytext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `price` float NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Дамп данных таблицы `a_price`
 --
 
-INSERT INTO `a_price` (`кодТовара`, `товар`, `типЦены`, `Цена`) VALUES
+INSERT INTO `a_price` (`productCode`, `productName`, `priceType`, `price`) VALUES
 (201, 'Бумага А4', 'Базовая', 11.5),
 (201, 'Бумага А4', 'Москва', 12.5),
 (202, 'Бумага А3', 'Базовая', 18.5),
@@ -81,20 +81,20 @@ INSERT INTO `a_price` (`кодТовара`, `товар`, `типЦены`, `Ц
 --
 
 CREATE TABLE `a_product` (
-  `Ид` int(11) NOT NULL,
-  `Код` int(11) NOT NULL,
-  `Название` tinytext COLLATE utf8mb4_unicode_ci NOT NULL
+  `Id` int(11) NOT NULL,
+  `Code` int(11) NOT NULL,
+  `Name` tinytext COLLATE utf8mb4_unicode_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Дамп данных таблицы `a_product`
 --
 
-INSERT INTO `a_product` (`Ид`, `Код`, `Название`) VALUES
-(66, 201, 'Бумага А4'),
-(67, 202, 'Бумага А3'),
-(68, 302, 'Принтер Canon'),
-(69, 305, 'Принтер HP');
+INSERT INTO `a_product` (`Id`, `Code`, `Name`) VALUES
+(70, 201, 'Бумага А4'),
+(71, 202, 'Бумага А3'),
+(72, 302, 'Принтер Canon'),
+(73, 305, 'Принтер HP');
 
 -- --------------------------------------------------------
 
@@ -103,16 +103,16 @@ INSERT INTO `a_product` (`Ид`, `Код`, `Название`) VALUES
 --
 
 CREATE TABLE `a_property` (
-  `кодТовара` int(11) NOT NULL,
-  `товар` tinytext COLLATE utf8mb4_unicode_ci NOT NULL,
-  `значениеСвойства` text COLLATE utf8mb4_unicode_ci NOT NULL
+  `productCode` int(11) NOT NULL,
+  `productName` tinytext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `property` text COLLATE utf8mb4_unicode_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Дамп данных таблицы `a_property`
 --
 
-INSERT INTO `a_property` (`кодТовара`, `товар`, `значениеСвойства`) VALUES
+INSERT INTO `a_property` (`productCode`, `productName`, `property`) VALUES
 (201, 'Бумага А4', 'Плотность 100'),
 (201, 'Бумага А4', 'Белизна 150 %'),
 (202, 'Бумага А3', 'Плотность 90'),
@@ -131,28 +131,28 @@ INSERT INTO `a_property` (`кодТовара`, `товар`, `значение�
 -- Индексы таблицы `a_category`
 --
 ALTER TABLE `a_category`
-  ADD PRIMARY KEY (`Ид`),
-  ADD KEY `Код` (`кодТовара`),
-  ADD KEY `Ид` (`ИдРодКатегории`);
+  ADD PRIMARY KEY (`Id`),
+  ADD KEY `Код` (`productName`),
+  ADD KEY `Ид` (`IdParentCategory`);
 
 --
 -- Индексы таблицы `a_price`
 --
 ALTER TABLE `a_price`
-  ADD KEY `Код` (`кодТовара`);
+  ADD KEY `Код` (`productCode`);
 
 --
 -- Индексы таблицы `a_product`
 --
 ALTER TABLE `a_product`
-  ADD PRIMARY KEY (`Ид`),
-  ADD UNIQUE KEY `Код` (`Код`);
+  ADD PRIMARY KEY (`Id`),
+  ADD UNIQUE KEY `Код` (`Code`);
 
 --
 -- Индексы таблицы `a_property`
 --
 ALTER TABLE `a_property`
-  ADD KEY `Код` (`кодТовара`) USING BTREE;
+  ADD KEY `Код` (`productCode`) USING BTREE;
 
 --
 -- AUTO_INCREMENT для сохранённых таблиц
@@ -162,13 +162,13 @@ ALTER TABLE `a_property`
 -- AUTO_INCREMENT для таблицы `a_category`
 --
 ALTER TABLE `a_category`
-  MODIFY `Ид` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=153;
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=159;
 
 --
 -- AUTO_INCREMENT для таблицы `a_product`
 --
 ALTER TABLE `a_product`
-  MODIFY `Ид` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=70;
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=74;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

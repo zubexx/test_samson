@@ -226,8 +226,11 @@ foreach ($prods as $prod)
  //echo "priceValue1: " . $priceValue1 . "<br>"  . "priceValue2: " .$priceValue2 . "<br>";
  
  if($code!=0){
+     //приводим к допустимой строке для запроса 
+    $code = mysqli_real_escape_string($link, $code);
+    $name = mysqli_real_escape_string($link, $name);
  // Попытка выполнения запроса вставки
- $sql = "INSERT INTO a_product (Код, Название) VALUES
+ $sql = "INSERT INTO a_product (Code, Name) VALUES
           ('$code', '$name');
        ";
 if(mysqli_query($link, $sql)){
@@ -236,7 +239,10 @@ if(mysqli_query($link, $sql)){
     echo "ERROR: Не удалось выполнить $sql. " . mysqli_error($link). "<br>";
 }
  
- $sql = "INSERT INTO a_price (кодТовара, товар, типЦены, Цена) VALUES
+ $priceValue1 = mysqli_real_escape_string($link, $priceValue1);
+ $priceValue2 = mysqli_real_escape_string($link, $priceValue2);
+
+ $sql = "INSERT INTO a_price (productCode, productName, priceType, price) VALUES
           ('$code', '$name','Базовая','$priceValue1'),
          ('$code', '$name','Москва','$priceValue2');
        ";
@@ -252,9 +258,8 @@ if(mysqli_query($link, $sql)){
      $property = implode(" ", $value);
   
 
- 
- 
-  $sql = "INSERT INTO a_property (кодТовара , товар, значениеСвойства) VALUES
+$property = mysqli_real_escape_string($link, $property);
+  $sql = "INSERT INTO a_property (productCode , productName, property) VALUES
           ('$code', '$name', '$property');
        ";
 if(mysqli_query($link, $sql)){
@@ -275,8 +280,8 @@ if(mysqli_query($link, $sql)){
      if($i==1)$catCode=floor($code/10);     // 30 - МФУ
      if($i>1)$catCode=floor($code/10)+$i;   // для более вложенных категорий
      $category=$prod->category[$i];
-     
-     $sql = "INSERT INTO a_category (Ид, Код, Название, кодТовара, ИдРодКатегории)
+     $category = mysqli_real_escape_string($link, $category);
+     $sql = "INSERT INTO a_category (Id, Code, Name, productName, IdParentCategory)
     VALUES(NULL,'$catCode','$category','$code', '$parentCatCode'); ";        
  if(mysqli_query($link, $sql)){
     echo "Записи успешно вставлены в a_category.". "<br>";
@@ -372,9 +377,11 @@ function exportXml($a, $b)
     $link  =  mysqli_connect("localhost", "root", "", "test_samson" ); //соединяемся с БД
     if (  !$link  )   die("Error");
 
-    $query   =  "SELECT кодТовара, Название, ИдРодКатегории FROM a_category WHERE Код=$b"; //запрос по категории
+    $b = mysqli_real_escape_string($link, $b); // проверяем введённую пользователем информацию на допустимость применения в запросе
+    
+    $query   =  "SELECT productName, Name, IdParentCategory FROM a_category WHERE Code ='$b'"; //запрос по категории
     $result  =  mysqli_query( $link,  $query );
-    if ( !$result ) echo "Произошла ошибка: "  .  mysqli_error();
+    if ( !$result ) echo "Произошла ошибка: "  .  mysqli_sqlstate($link);//mysqli_error()
     else echo "Данные получены по коду ".$b."<br>";
 
     
@@ -386,30 +393,30 @@ function exportXml($a, $b)
     foreach ($entries as $value)
         {
              
-            $code=(int)$value['кодТовара'];
+            $code=(int)$value['productName'];
             if($code!=0)
             {
                 
-            $query   =  "SELECT Название FROM a_product WHERE Код=$code"; //выбираем продукты с кодом присутствующем в категории
+            $query   =  "SELECT Name FROM a_product WHERE Code =$code"; //выбираем продукты с кодом присутствующем в категории
             $result  =  mysqli_query( $link,  $query );
             if ( !$result ) echo "Произошла ошибка: "  .  mysqli_error();
             else echo "Данные получены из a_product"."<br>";
             $entries = $result->fetch_all(MYSQLI_ASSOC);
-            $prods[$i]->name=$entries[0]['Название'];
+            $prods[$i]->name=$entries[0]['Name'];
             $prods[$i]->code=$code;
-            $prods[$i]->category[]=$value['Название'];
+            $prods[$i]->category[]=$value['Name'];
             
-            $query   =  "SELECT типЦены, Цена FROM a_price WHERE кодТовара=$code"; //выбираем цены по коду товара
+            $query   =  "SELECT priceType, price FROM a_price WHERE productCode=$code"; //выбираем цены по коду товара
             $result  =  mysqli_query( $link,  $query );
             if ( !$result ) echo "Произошла ошибка: "  .  mysqli_error();
             else echo "Данные получены из a_price"."<br>";
             $entries = $result->fetch_all(MYSQLI_ASSOC);
             foreach ($entries as $val)
             {
-                $prods[$i]->price[$val['типЦены']]=$val['Цена'];
+                $prods[$i]->price[$val['priceType']]=$val['price'];
             }
             
-            $query   =  "SELECT значениеСвойства FROM a_property WHERE кодТовара=$code"; //выбираем свойства по коду товара
+            $query   =  "SELECT property FROM a_property WHERE productCode=$code"; //выбираем свойства по коду товара
             $result  =  mysqli_query( $link,  $query );
             if ( !$result ) echo "Произошла ошибка: "  .  mysqli_error();
             else echo "Данные получены из a_property"."<br>";
@@ -422,10 +429,10 @@ function exportXml($a, $b)
                 $prods[$i]->property[]=explode(" ", $s);
             }
            
-            $parent=(int)$value['ИдРодКатегории'];
+            $parent=(int)$value['IdParentCategory'];
             while ($parent!=0)
                 {
-                    $query   =  "SELECT Название,ИдРодКатегории FROM a_category WHERE Код=$parent"; //выбираем рубрики в которых присутствует товар
+                    $query   =  "SELECT Name, IdParentCategory FROM a_category WHERE Code=$parent"; //выбираем рубрики в которых присутствует товар
                     $result  =  mysqli_query( $link,  $query );
                     if ( !$result ) echo "Произошла ошибка: "  .  mysqli_error();
                     else echo "Данные получены из a_category"."<br>";
@@ -433,8 +440,8 @@ function exportXml($a, $b)
     
                     foreach ($entries as $value)
                         {
-                            $prods[$i]->category[]=$value['Название'];
-                            $parent=$value['ИдРодКатегории'];
+                            $prods[$i]->category[]=$value['Name'];
+                            $parent=$value['IdParentCategory'];
                         }
                     $prods[$i]->category = array_unique($prods[$i]->category);
                 }
